@@ -1,4 +1,4 @@
-import { Component, PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 export default class Field extends Component {
 
@@ -34,6 +34,28 @@ export default class Field extends Component {
 			...rest
 		} = this.props;
 
-		return component(input, rest);
+		if (typeof component === 'function') {
+			return component(input, rest);
+		}
+
+		switch (input.type) {
+			case 'textarea':
+				return this.renderTextArea(input, rest);
+
+			default: return this.renderInput(input, rest);
+		}
+	}
+
+	renderTextArea = (input, rest) => {
+		return (
+			<textarea {...input} />
+		);
+	}
+
+	renderInput = (input, rest) => {
+		console.log('rest', rest)
+		return (
+			<input {...input} />
+		);
 	}
 }

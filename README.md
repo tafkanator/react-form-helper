@@ -4,3 +4,4 @@ Todo:
 * documentation
 * travis
 * tests
+* more examples

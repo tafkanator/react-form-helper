@@ -47,6 +47,8 @@ export default class Form extends Component {
 			...rest
 		} = this.props;
 
+		console.log('tere', this.getEnhancedChildren(children))
+
 		return (
 			<form {...rest} onSubmit={this.handleSubmit}>
 				{this.getEnhancedChildren(children)}
@@ -172,7 +174,9 @@ export default class Form extends Component {
 				});
 
 			default:
-				return child.props && child.props.children ? this.getEnhancedChildren(child.props.children) : child;
+				return child.props && child.props.children
+					? React.cloneElement(child, { children: this.getEnhancedChildren(child.props.children) })
+					: child;
 		}
 	});
 

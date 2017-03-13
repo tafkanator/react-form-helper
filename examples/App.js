@@ -3,7 +3,7 @@ import React from 'react';
 import { Form, Field, WithFormProp } from '../src';
 import { required, minLength } from './validators';
 
-const handleCommentFormSubmit = () => console.log('submit');
+const handleCommentFormSubmit = (values) => console.log('submit', values);
 const handleCommentFormSuccess = () => console.log('success');
 const handleCommentFormFail = () => console.log('fail');
 
@@ -21,7 +21,7 @@ const renderCommentFormField = ({ type, ...props }, { error, isTouched }) => {
 	}
 
 	return (
-		<div className="PostView__add-comment__field">
+		<div className="form__field">
 			{inputElem}
 			<br />
 			{isTouched && error && (
@@ -33,39 +33,31 @@ const renderCommentFormField = ({ type, ...props }, { error, isTouched }) => {
 
 const App = () => (
 	<Form
-		className="PostView__add-comment"
+		className="form"
 		onSubmit={handleCommentFormSubmit}
 		onSuccess={handleCommentFormSuccess}
 		onFail={handleCommentFormFail}
 	>
-		<div className="PostView__add-comment__field">
+		<div className="form__row">
 			<label>Name</label>
-			<Field
-				type="text"
-				name="name"
-				validate={[required, minLength(3)]}
-				component={renderCommentFormField}
-			/>
+			<Field type="text" name="name" validate={[required, minLength(3)]} />
 		</div>
 
-		<div className="PostView__add-comment__field">
+		<div className="form__row">
 			<label>Email</label>
-			<Field
-				type="text"
-				name="email"
-				validate={[required, minLength(3)]}
-				component={renderCommentFormField}
-			/>
+			<Field type="text" name="email" validate={[required, minLength(3)]} component={renderCommentFormField} />
 		</div>
 
-		<div className="PostView__add-comment__field">
+		<div className="form__row">
 			<label>Comment</label>
-			<Field
-				type="textarea"
-				name="body"
-				validate={required}
-				component={renderCommentFormField}
-			/>
+			<Field type="textarea" name="body" validate={required} />
+		</div>
+
+		<div className="form__row">
+			<label>
+				<Field type="checkbox" name="subscribe" />
+				Get email notifications
+			</label>
 		</div>
 
 		<WithFormProp isSubmitting>

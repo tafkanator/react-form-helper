@@ -3,33 +3,22 @@ import React from 'react';
 import { Form, Field, WithFormProp } from '../src';
 import { required, minLength } from './validators';
 
-const handleCommentFormSubmit = (values) => console.log('submit', values);
+const handleCommentFormSubmit = values => console.log('submit', values);
 const handleCommentFormSuccess = () => console.log('success');
 const handleCommentFormFail = () => console.log('fail');
 
-const renderCommentFormField = ({ type, ...props }, { error, isTouched }) => {
-	let inputElem;
+const renderSelect = (input, { error, isTouched }) => (
+	<div className="form__field">
+		<select {...input}>
+			<option value="male">male</option>
+			<option value="female">female</option>
+		</select>
 
-	switch (type) {
-		case 'textarea':
-			inputElem = <textarea {...props} rows="5" />;
-			break;
-
-		default:
-			inputElem = <input {...props} type={type} />;
-			break;
-	}
-
-	return (
-		<div className="form__field">
-			{inputElem}
-			<br />
-			{isTouched && error && (
-				<small>{error}</small>
-			)}
-		</div>
-	);
-};
+		{isTouched && error && (
+			<span className="form__field__error">{error}</span>
+		)}
+	</div>
+);
 
 const App = () => (
 	<Form
@@ -39,18 +28,23 @@ const App = () => (
 		onFail={handleCommentFormFail}
 	>
 		<div className="form__row">
-			<label>Name</label>
-			<Field type="text" name="name" validate={[required, minLength(3)]} />
+			<label className="form__row__label">Name</label><br />
+			<Field className="form__row__field" type="text" name="name" validate={[required, minLength(3)]} />
 		</div>
 
 		<div className="form__row">
-			<label>Email</label>
-			<Field type="text" name="email" validate={[required, minLength(3)]} component={renderCommentFormField} />
+			<label>Email</label><br />
+			<Field type="text" name="email" validate={[required, minLength(3)]} />
 		</div>
 
 		<div className="form__row">
-			<label>Comment</label>
+			<label>Comment</label><br />
 			<Field type="textarea" name="body" validate={required} />
+		</div>
+
+		<div className="form__row">
+			<label>Gender</label><br />
+			<Field name="gender" component={renderSelect} defaultValue="female" />
 		</div>
 
 		<div className="form__row">

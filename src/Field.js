@@ -8,7 +8,7 @@ export default class Field extends Component {
 		error: PropTypes.string,
 		validate: PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.func)]),
 		name: PropTypes.string.isRequired,
-		type: PropTypes.string.isRequired,
+		type: PropTypes.string,
 		defaultValue: PropTypes.any,
 		input: PropTypes.shape({
 			onChange: PropTypes.func,
@@ -38,24 +38,19 @@ export default class Field extends Component {
 			return component(input, rest);
 		}
 
-		switch (input.type) {
-			case 'textarea':
-				return this.renderTextArea(input, rest);
-
-			default: return this.renderInput(input, rest);
-		}
+		return this.renderInput(input, rest);
 	}
 
-	renderTextArea = (input, rest) => {
-		return (
-			<textarea {...input} />
-		);
-	}
+	renderInput = ({ type, ...props }, { isTouched, error, className }) => (
+		<span className={className}>
+			{type === 'textarea'
+				? (<textarea className={`${className}__input`} {...props} />)
+				: (<input className={`${className}__input`} type={type || 'text'} {...props} />)
+			}
 
-	renderInput = (input, rest) => {
-		console.log('rest', rest)
-		return (
-			<input {...input} />
-		);
-	}
+			{isTouched && error && (
+				<span className={`${className}__error`}>{error}</span>
+			)}
+		</span>
+	);
 }

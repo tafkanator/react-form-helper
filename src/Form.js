@@ -28,6 +28,7 @@ export default class Form extends Component {
 
 	componentDidMount = () => {
 		this.setState({
+			fields: this.getInitialValues(),
 			isMounted: true,
 		});
 	}
@@ -46,8 +47,6 @@ export default class Form extends Component {
 			onFail, // eslint-disable-line no-unused-vars
 			...rest
 		} = this.props;
-
-		console.log('tere', this.getEnhancedChildren(children))
 
 		return (
 			<form {...rest} onSubmit={this.handleSubmit}>
@@ -151,6 +150,8 @@ export default class Form extends Component {
 	getEnhancedChildren = children => React.Children.map(children, (child) => {
 		switch (this.getInstanceOf(child)) {
 			case Field.name:
+
+				// enhance element
 				return React.cloneElement(child, {
 					isTouched: this.isTouched(child.props.name),
 					error: this.state.errors[child.props.name] || null,
@@ -159,9 +160,7 @@ export default class Form extends Component {
 						onBlur: this.handleBlur.bind(null, child.props.validate),
 						name: child.props.name,
 						type: child.props.type,
-						value: (child.props.name in this.state.fields)
-							? this.state.fields[child.props.name]
-							: child.props.defaultValue || '',
+						value: this.state.fields[child.props.name],
 					},
 				});
 
@@ -180,6 +179,27 @@ export default class Form extends Component {
 		}
 	});
 
+	getInitialValues = (children = this.props.children, fields = {}) => {
+		React.Children.forEach(children, (child) => {
+			if (!child.props) {
+				return;
+			}
+
+			console.log('asd', child.props.children)
+
+			if (child.props.children) {
+				fields = update(fields, { $merge: this.getInitialValues(child.props.children, fields) });
+			}
+
+			if (child.props.defaultValue !== undefined && fields[child.props.name] === undefined) {
+				fields[child.props.name] = child.props.defaultValue;
+			} else if (this.getInstanceOf(child) === Field.name) {
+				fields[child.props.name] = '';
+			}
+		});
+
+		return fields;
+	}
 
 	isTouched = name => this.state.touchedFields.indexOf(name) !== -1
 

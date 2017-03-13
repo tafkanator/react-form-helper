@@ -1,0 +1,10 @@
+{
+  "extends": "sl",
+  "rules": {
+    "react/jsx-quotes": 0
+  },
+  "env": {
+    "browser": true,
+    "jest": true
+  }
+}

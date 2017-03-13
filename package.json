@@ -1,6 +1,6 @@
 {
   "name": "react-form-helper-sl",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Make creating react forms easier. It handlse state, validation and async submission",
   "main": "./dist/index.js",
   "directories": {
@@ -12,8 +12,7 @@
     "build": "webpack",
     "test": "",
     "clean": "rimraf dist coverage",
-    "prepublish": "npm run clean && npm run build",
-    "postinstall": "npm run build"
+    "prepublish": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",

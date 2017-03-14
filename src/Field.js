@@ -42,7 +42,7 @@ export default class Field extends Component {
 	}
 
 	renderInput = ({ type, ...props }, { isTouched, error, className }) => (
-		<span className={className}>
+		<span className={isTouched && error ? `${className} ${className}--has-errors` : className}>
 			{type === 'textarea'
 				? (<textarea className={`${className}__input`} {...props} />)
 				: (<input className={`${className}__input`} type={type || 'text'} {...props} />)

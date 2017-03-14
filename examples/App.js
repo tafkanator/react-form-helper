@@ -3,9 +3,13 @@ import React from 'react';
 import { Form, Field, WithFormProp } from '../src';
 import { required, minLength } from './validators';
 
-const handleCommentFormSubmit = values => console.log('submit', values);
+const handleCommentFormSubmit = (values) => {
+	console.log('submit', values);
+	// return false;
+};
+
 const handleCommentFormSuccess = () => console.log('success');
-const handleCommentFormFail = () => console.log('fail');
+const handleCommentFormFail = e => console.log('fail', e);
 
 const renderSelect = (input, { error, isTouched }) => (
 	<div className="form__field">
@@ -39,7 +43,7 @@ const App = () => (
 
 		<div className="form__row">
 			<label>Comment</label><br />
-			<Field type="textarea" name="body" validate={required} />
+			<Field type="textarea" name="comment" validate={required} />
 		</div>
 
 		<div className="form__row">
@@ -49,7 +53,7 @@ const App = () => (
 
 		<div className="form__row">
 			<label>
-				<Field type="checkbox" name="subscribe" />
+				<Field type="checkbox" name="subscribeToEmail" />
 				Get email notifications
 			</label>
 		</div>

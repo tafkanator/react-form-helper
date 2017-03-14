@@ -91,7 +91,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
 
 exports.__esModule = true;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
@@ -121,6 +127,10 @@ var Field = function (_Component) {
 			var _this3;
 
 			return (_this3 = _this).__render__REACT_HOT_LOADER__.apply(_this3, arguments);
+		}, _this.renderInput = function () {
+			var _this4;
+
+			return (_this4 = _this).__renderInput__REACT_HOT_LOADER__.apply(_this4, arguments);
 		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
@@ -138,7 +148,31 @@ var Field = function (_Component) {
 		    defaultValue = _props.defaultValue,
 		    rest = _objectWithoutProperties(_props, ['input', 'component', 'validate', 'name', 'type', 'defaultValue']);
 
-		return component(input, rest);
+		if (typeof component === 'function') {
+			return component(input, rest);
+		}
+
+		return this.renderInput(input, rest);
+	};
+
+	Field.prototype.__renderInput__REACT_HOT_LOADER__ = function __renderInput__REACT_HOT_LOADER__(_ref, _ref2) {
+		var isTouched = _ref2.isTouched,
+		    error = _ref2.error,
+		    className = _ref2.className;
+
+		var type = _ref.type,
+		    props = _objectWithoutProperties(_ref, ['type']);
+
+		return _react2.default.createElement(
+			'span',
+			{ className: isTouched && error ? className + ' ' + className + '--has-errors' : className },
+			type === 'textarea' ? _react2.default.createElement('textarea', _extends({ className: className + '__input' }, props)) : _react2.default.createElement('input', _extends({ className: className + '__input', type: type || 'text' }, props)),
+			isTouched && error && _react2.default.createElement(
+				'span',
+				{ className: className + '__error' },
+				error
+			)
+		);
 	};
 
 	return Field;
@@ -150,7 +184,7 @@ Field.propTypes = {
 	error: _react.PropTypes.string,
 	validate: _react.PropTypes.oneOfType([_react.PropTypes.func, _react.PropTypes.arrayOf(_react.PropTypes.func)]),
 	name: _react.PropTypes.string.isRequired,
-	type: _react.PropTypes.string.isRequired,
+	type: _react.PropTypes.string,
 	defaultValue: _react.PropTypes.any,
 	input: _react.PropTypes.shape({
 		onChange: _react.PropTypes.func,
@@ -276,10 +310,10 @@ var Form = function (_Component) {
 			args[_key] = arguments[_key];
 		}
 
-		return _ret = (_temp = (_this = _possibleConstructorReturn(this, _Component.call.apply(_Component, [this].concat(args))), _this), _this.state = Form.getInitialState(), _this.componentDidMount = function () {
+		return _ret = (_temp = (_this = _possibleConstructorReturn(this, _Component.call.apply(_Component, [this].concat(args))), _this), _this.state = Form.getInitialState(), _this.componentWillMount = function () {
 			var _this2;
 
-			return (_this2 = _this).__componentDidMount__REACT_HOT_LOADER__.apply(_this2, arguments);
+			return (_this2 = _this).__componentWillMount__REACT_HOT_LOADER__.apply(_this2, arguments);
 		}, _this.componentWillUnmount = function () {
 			var _this3;
 
@@ -320,25 +354,39 @@ var Form = function (_Component) {
 			var _this12;
 
 			return (_this12 = _this).__getEnhancedChildren__REACT_HOT_LOADER__.apply(_this12, arguments);
-		}, _this.isTouched = function () {
+		}, _this.getFields = function () {
 			var _this13;
 
-			return (_this13 = _this).__isTouched__REACT_HOT_LOADER__.apply(_this13, arguments);
-		}, _this.getFieldErrors = function () {
+			return (_this13 = _this).__getFields__REACT_HOT_LOADER__.apply(_this13, arguments);
+		}, _this.validateFieldProps = function () {
 			var _this14;
 
-			return (_this14 = _this).__getFieldErrors__REACT_HOT_LOADER__.apply(_this14, arguments);
-		}, _this.reset = function () {
+			return (_this14 = _this).__validateFieldProps__REACT_HOT_LOADER__.apply(_this14, arguments);
+		}, _this.isTouched = function () {
 			var _this15;
 
-			return (_this15 = _this).__reset__REACT_HOT_LOADER__.apply(_this15, arguments);
+			return (_this15 = _this).__isTouched__REACT_HOT_LOADER__.apply(_this15, arguments);
+		}, _this.checkFormErrors = function () {
+			var _this16;
+
+			return (_this16 = _this).__checkFormErrors__REACT_HOT_LOADER__.apply(_this16, arguments);
+		}, _this.getFieldErrors = function () {
+			var _this17;
+
+			return (_this17 = _this).__getFieldErrors__REACT_HOT_LOADER__.apply(_this17, arguments);
+		}, _this.getFieldInitialValue = function () {
+			var _this18;
+
+			return (_this18 = _this).__getFieldInitialValue__REACT_HOT_LOADER__.apply(_this18, arguments);
+		}, _this.reset = function () {
+			var _this19;
+
+			return (_this19 = _this).__reset__REACT_HOT_LOADER__.apply(_this19, arguments);
 		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
-	Form.prototype.__componentDidMount__REACT_HOT_LOADER__ = function __componentDidMount__REACT_HOT_LOADER__() {
-		this.setState({
-			isMounted: true
-		});
+	Form.prototype.__componentWillMount__REACT_HOT_LOADER__ = function __componentWillMount__REACT_HOT_LOADER__() {
+		this.reset();
 	};
 
 	Form.prototype.__componentWillUnmount__REACT_HOT_LOADER__ = function __componentWillUnmount__REACT_HOT_LOADER__() {
@@ -368,10 +416,10 @@ var Form = function (_Component) {
 		var key = e.target.name;
 		var value = e.target.value;
 
-		var error = this.isTouched(key) ? this.getFieldErrors(validators, value) : null;
+		var error = this.isTouched(key) ? this.getFieldErrors(e.target.name, value) : null;
 
 		this.setState({
-			fields: (0, _immutabilityHelper2.default)(this.state.fields, (_update = {}, _update[key] = { $set: value }, _update)),
+			values: (0, _immutabilityHelper2.default)(this.state.values, (_update = {}, _update[key] = { $set: value }, _update)),
 			errors: (0, _immutabilityHelper2.default)(this.state.errors, (_update2 = {}, _update2[key] = { $set: error }, _update2))
 		});
 	};
@@ -383,7 +431,7 @@ var Form = function (_Component) {
 		var value = e.target.value;
 
 		var newState = {
-			errors: (0, _immutabilityHelper2.default)(this.state.errors, (_update3 = {}, _update3[key] = { $set: this.getFieldErrors(validators, value) }, _update3))
+			errors: (0, _immutabilityHelper2.default)(this.state.errors, (_update3 = {}, _update3[key] = { $set: this.getFieldErrors(e.target.name, value) }, _update3))
 		};
 
 		if (this.state.touchedFields.indexOf(key) === -1) {
@@ -394,22 +442,31 @@ var Form = function (_Component) {
 	};
 
 	Form.prototype.__handleSubmit__REACT_HOT_LOADER__ = function __handleSubmit__REACT_HOT_LOADER__(e) {
-		var fields = this.state.fields;
+		var values = this.state.values;
 
 
 		e.preventDefault();
 
-		var response = this.props.onSubmit(fields);
+		// do not submit if we have invalid values
+		if (this.checkFormErrors()) {
+			return;
+		}
 
+		// submit form
+		var response = this.props.onSubmit(values);
+
+		// setup async response listeners
 		if (this.isPromise(response)) {
 			this.setState({
 				isSubmitting: true
 			});
 
-			return response.then(this.handleSuccess, this.handleFail);
+			response.then(this.handleSuccess, this.handleFail);
+		} else if (response === true || response === undefined) {
+			this.handleSuccess();
+		} else {
+			this.handleFail(response);
 		}
-
-		return response;
 	};
 
 	Form.prototype.__handleSuccess__REACT_HOT_LOADER__ = function __handleSuccess__REACT_HOT_LOADER__() {
@@ -458,44 +515,108 @@ var Form = function (_Component) {
 	};
 
 	Form.prototype.__getEnhancedChildren__REACT_HOT_LOADER__ = function __getEnhancedChildren__REACT_HOT_LOADER__(children) {
-		var _this16 = this;
+		var _this20 = this;
 
 		return _react2.default.Children.map(children, function (child) {
-			switch (_this16.getInstanceOf(child)) {
+			switch (_this20.getInstanceOf(child)) {
 				case _Field2.default.name:
+
+					// enhance element
 					return _react2.default.cloneElement(child, {
-						isTouched: _this16.isTouched(child.props.name),
-						error: _this16.state.errors[child.props.name] || null,
+						isTouched: _this20.isTouched(child.props.name),
+						error: _this20.state.errors[child.props.name] || null,
 						input: {
-							onChange: _this16.handleChange.bind(null, child.props.validate),
-							onBlur: _this16.handleBlur.bind(null, child.props.validate),
+							onChange: _this20.handleChange.bind(null, child.props.validate),
+							onBlur: _this20.handleBlur.bind(null, child.props.validate),
 							name: child.props.name,
 							type: child.props.type,
-							value: child.props.name in _this16.state.fields ? _this16.state.fields[child.props.name] : child.props.defaultValue || ''
+							value: _this20.state.values[child.props.name]
 						}
 					});
 
 				case _WithFormProp2.default.name:
 					return _react2.default.cloneElement(child, {
 						values: {
-							hasErrors: Object.values(_this16.state.errors).filter(function (value) {
+							hasErrors: Object.values(_this20.state.errors).filter(function (value) {
 								return Boolean(value);
 							}).length > 0,
-							isSubmitting: _this16.state.isSubmitting
+							isSubmitting: _this20.state.isSubmitting
 						}
 					});
 
 				default:
-					return child.props && child.props.children ? _this16.getEnhancedChildren(child.props.children) : child;
+					return child.props && child.props.children ? _react2.default.cloneElement(child, { children: _this20.getEnhancedChildren(child.props.children) }) : child;
 			}
 		});
+	};
+
+	Form.prototype.__getFields__REACT_HOT_LOADER__ = function __getFields__REACT_HOT_LOADER__() {
+		var _this21 = this;
+
+		var children = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.props.children;
+		var formFields = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+		var fields = formFields;
+
+		_react2.default.Children.forEach(children, function (child) {
+			if (!child.props) {
+				return;
+			}
+
+			if (child.props.children) {
+				// if nested, go deeper
+				fields = (0, _immutabilityHelper2.default)(fields, { $merge: _this21.getFields(child.props.children, fields) });
+			} else if (_this21.getInstanceOf(child) === _Field2.default.name) {
+				// if it is field, create reference for it
+				_this21.validateFieldProps(child, fields);
+				fields[child.props.name] = child;
+			}
+		});
+
+		return fields;
+	};
+
+	Form.prototype.__validateFieldProps__REACT_HOT_LOADER__ = function __validateFieldProps__REACT_HOT_LOADER__(child, fields) {
+		if (false) {
+			// eslint-disable-next-line no-console
+			console.error('Warning: Field with name "' + child.props.name + '" already exists. Use different value for name');
+		}
 	};
 
 	Form.prototype.__isTouched__REACT_HOT_LOADER__ = function __isTouched__REACT_HOT_LOADER__(name) {
 		return this.state.touchedFields.indexOf(name) !== -1;
 	};
 
-	Form.prototype.__getFieldErrors__REACT_HOT_LOADER__ = function __getFieldErrors__REACT_HOT_LOADER__(validators, value) {
+	Form.prototype.__checkFormErrors__REACT_HOT_LOADER__ = function __checkFormErrors__REACT_HOT_LOADER__() {
+		var _this22 = this;
+
+		var _state = this.state,
+		    touchedFields = _state.touchedFields,
+		    fields = _state.fields,
+		    values = _state.values;
+
+
+		var errors = Object.keys(fields).reduce(function (obj, name) {
+			var error = _this22.getFieldErrors(name, values[name]);
+
+			if (error) {
+				obj[name] = error; // eslint-disable-line no-param-reassign
+			}
+
+			return obj;
+		}, {});
+
+		this.setState({
+			errors: errors,
+			touchedFields: (0, _immutabilityHelper2.default)(touchedFields, { $merge: Object.keys(errors) })
+		});
+
+		return Object.keys(errors).length > 0;
+	};
+
+	Form.prototype.__getFieldErrors__REACT_HOT_LOADER__ = function __getFieldErrors__REACT_HOT_LOADER__(fieldName, value) {
+		var validators = this.state.fields[fieldName].props.validate;
+
 		if (typeof validators === 'function') {
 			return validators(value) || null;
 		} else if (Array.isArray(validators)) {
@@ -509,8 +630,26 @@ var Form = function (_Component) {
 		return null;
 	};
 
+	Form.prototype.__getFieldInitialValue__REACT_HOT_LOADER__ = function __getFieldInitialValue__REACT_HOT_LOADER__(props) {
+		if (props.defaultValue !== undefined) {
+			return props.defaultValue;
+		}
+
+		return '';
+	};
+
 	Form.prototype.__reset__REACT_HOT_LOADER__ = function __reset__REACT_HOT_LOADER__() {
+		var _this23 = this;
+
+		var fields = this.getFields();
+
 		this.setState(Form.getInitialState({
+			fields: fields,
+			values: Object.values(fields).reduce(function (values, field) {
+				var _update4;
+
+				return (0, _immutabilityHelper2.default)(values, (_update4 = {}, _update4[field.props.name] = { $set: _this23.getFieldInitialValue(field.props) }, _update4));
+			}, {}),
 			isMounted: true
 		}));
 	};
@@ -529,9 +668,9 @@ Form.getInitialState = function () {
 	var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	return _extends({
 		fields: {},
+		values: {},
 		errors: {},
 		touchedFields: [],
-		enhancedChildren: [],
 		isMounted: false,
 		isSubmitting: false
 	}, props);

@@ -6,6 +6,137 @@
 	<meta charset="utf-8">
 
 	<title>Examples</title>
+
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			background-color: #eee;
+			font: 16px/1.4 Arial, Helvetica, sans-serif;
+			color: #333;
+		}
+
+		.form {
+			margin: 2rem 0;
+			padding: 2rem;
+			border: 1px solid #ccc;
+			background-color: #fafafa;
+			border-radius: .25rem;
+			box-shadow: 0 0 2rem #ccc;
+			width: 50vw;
+			min-width: 300px;
+			max-width: 600px;
+		}
+
+		.form__header {
+			font-size: 2rem;
+			text-align: center;
+			margin-top: 2rem;
+		}
+
+		.form__row + .form__row {
+			margin-top: 2rem;
+		}
+
+		.form__row__label {
+			display: block;
+			color: #666;
+		}
+
+		.form__row__option + .form__row__option {
+			display: inline-block;
+			margin-left: 1rem;
+		}
+
+		.field + .field {
+			display: inline-block;
+			margin-left: 10rem;
+		}
+
+		.field__input {
+			display: block;
+			width: 100%;
+			padding: .5rem .75rem;
+			font-size: 1rem;
+			line-height: 1.25;
+			background-color: #fff;
+			background-image: none;
+			border: 1px solid rgba(0, 0, 0, .15);
+			border-radius: .25rem;
+		}
+
+		.field__input[type="radio"],
+		.field__input[type="checkbox"] {
+			display: inline-block;
+			width: initial;
+		}
+
+		.field--has-errors .field__input {
+			border-color: tomato;
+		}
+
+		.field__error {
+			display: block;
+			font-size: .8rem;
+			margin: .2rem;
+			color: tomato;
+			animation: fadein 300ms;
+		}
+
+		.field__error:hover {
+			overflow: visible;
+		}
+
+		.form__actions {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-top: 2rem;
+		}
+
+		.form__actions .btn {
+			margin-left: auto;
+		}
+
+		.btn {
+			display: inline-block;
+			font-weight: 400;
+			line-height: 1.25;
+			text-align: center;
+			white-space: nowrap;
+			vertical-align: middle;
+			user-select: none;
+			border: 1px solid transparent;
+			padding: .5rem 1rem;
+			font-size: 1rem;
+			border-radius: .25rem;
+			background-color:seagreen;
+			color: #eee;
+		}
+
+		.btn:disabled {
+			opacity: .5;
+		}
+
+		@keyframes fadein {
+			from {
+				opacity: 0;
+				transform: translateY(-4px);
+			}
+			to {
+				opacity: 1;
+				transform: none;
+			}
+		}
+	</style>
 </head>
 
 <body>

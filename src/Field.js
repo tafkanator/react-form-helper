@@ -10,16 +10,26 @@ export default class Field extends Component {
 		name: PropTypes.string.isRequired,
 		type: PropTypes.string,
 		defaultValue: PropTypes.any,
+		value: PropTypes.any,
+		defaultChecked: PropTypes.bool,
 		input: PropTypes.shape({
 			onChange: PropTypes.func,
 			onBlur: PropTypes.func,
 			type: PropTypes.any,
+			name: PropTypes.string.isRequired,
 			value: PropTypes.any,
+			checked: PropTypes.bool,
 		}),
 	}
 
+	static defaultProps = {
+		type: 'text',
+		className: 'field',
+	};
+
 	shouldComponentUpdate = nextProps =>
 		this.props.input.value !== nextProps.input.value
+		|| this.props.input.checked !== nextProps.input.checked
 		|| this.props.isTouched !== nextProps.isTouched
 		|| this.props.error !== nextProps.error;
 
@@ -31,6 +41,7 @@ export default class Field extends Component {
 			name, // eslint-disable-line no-unused-vars
 			type, // eslint-disable-line no-unused-vars
 			defaultValue, // eslint-disable-line no-unused-vars
+			defaultChecked, // eslint-disable-line no-unused-vars
 			...rest
 		} = this.props;
 

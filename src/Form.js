@@ -4,7 +4,6 @@ import update from 'immutability-helper';
 import Field from './Field';
 import WithFormProp from './WithFormProp';
 
-
 export default class Form extends Component {
 
 	static propTypes = {
@@ -53,30 +52,36 @@ export default class Form extends Component {
 	};
 
 	handleChange = (validators, e) => {
-		const key = e.target.name;
-		const value = e.target.value;
+		const {
+			values,
+			errors,
+		} = this.state;
 
-		const error = this.isTouched(key) ? this.getFieldErrors(e.target.name, value) : null;
+		const key = e.target.name;
+		const value = this.getFieldValue(e.target);
+		const error = this.isTouched(key) ? this.getFieldErrors(this.getFieldName(e.target), value) : null;
 
 		this.setState({
-			values: update(this.state.values, { [key]: { $set: value } }),
-			errors: update(this.state.errors, { [key]: { $set: error } }),
+			values: update(values, { [key]: { $set: value } }),
+			errors: update(errors, { [key]: { $set: error } }),
 		});
 	}
 
 	handleBlur = (validators, e) => {
+		const {
+			errors,
+			touchedFields,
+		} = this.state;
+
 		const key = e.target.name;
-		const value = e.target.value;
+		const value = this.getFieldValue(e.target);
 
-		const newState = {
-			errors: update(this.state.errors, { [key]: { $set: this.getFieldErrors(e.target.name, value) } }),
-		};
-
-		if (this.state.touchedFields.indexOf(key) === -1) {
-			newState.touchedFields = update(this.state.touchedFields, { $push: [key] });
-		}
-
-		this.setState(newState);
+		this.setState({
+			errors: update(errors, { [key]: { $set: this.getFieldErrors(this.getFieldName(e.target), value) } }),
+			touchedFields: touchedFields.indexOf(key) === -1
+				? update(touchedFields, { $push: [key] })
+				: touchedFields,
+		});
 	}
 
 	handleSubmit = (e) => {
@@ -155,20 +160,28 @@ export default class Form extends Component {
 
 	getEnhancedChildren = children => React.Children.map(children, (child) => {
 		switch (this.getInstanceOf(child)) {
-			case Field.name:
+			case Field.name: {
+				const input = {
+					onChange: this.handleChange.bind(null, child.props.validate),
+					onBlur: this.handleBlur.bind(null, child.props.validate),
+					name: child.props.name,
+					type: child.props.type,
+				};
+
+				if (child.props.type === 'radio') {
+					input.value = child.props.value;
+					input.checked = this.state.values[child.props.name] === child.props.value;
+				} else {
+					input.value = this.state.values[child.props.name];
+				}
 
 				// enhance element
 				return React.cloneElement(child, {
 					isTouched: this.isTouched(child.props.name),
 					error: this.state.errors[child.props.name] || null,
-					input: {
-						onChange: this.handleChange.bind(null, child.props.validate),
-						onBlur: this.handleBlur.bind(null, child.props.validate),
-						name: child.props.name,
-						type: child.props.type,
-						value: this.state.values[child.props.name],
-					},
+					input,
 				});
+			}
 
 			case WithFormProp.name:
 				return React.cloneElement(child, {
@@ -199,7 +212,12 @@ export default class Form extends Component {
 			} else if (this.getInstanceOf(child) === Field.name) {
 				// if it is field, create reference for it
 				this.validateFieldProps(child, fields);
-				fields[child.props.name] = child;
+
+				if (child.props.type === 'radio') {
+					fields[`${child.props.name}-${child.props.value}`] = child;
+				} else {
+					fields[child.props.name] = child;
+				}
 			}
 		});
 
@@ -207,7 +225,18 @@ export default class Form extends Component {
 	}
 
 	validateFieldProps = (child, fields) => {
-		if (process.env.NODE_ENV !== 'production' && child.props.name in fields) {
+		if (process.env.NODE_ENV === 'production') {
+			return;
+		}
+
+		if (child.props.type === 'radio' && child.props.value === undefined) {
+			// eslint-disable-next-line no-console
+			console.error(
+				`Warning: Field with name "${child.props.name}" does not have prop "value".`,
+			);
+		}
+
+		if (child.props.name in fields && child.props.type !== 'radio') {
 			// eslint-disable-next-line no-console
 			console.error(
 				`Warning: Field with name "${child.props.name}" already exists. Use different value for name`,
@@ -254,7 +283,19 @@ export default class Form extends Component {
 		return null;
 	}
 
-	getFieldInitialValue = (props) => {
+	getFieldInitialValue = (props, values) => {
+		if (props.type === 'checkbox') {
+			return !!props.defaultChecked;
+		}
+
+		if (props.type === 'radio') {
+			if (props.defaultChecked) {
+				return props.value;
+			}
+
+			return props.name in values ? values[props.name] : undefined;
+		}
+
 		if (props.defaultValue !== undefined) {
 			return props.defaultValue;
 		}
@@ -262,13 +303,17 @@ export default class Form extends Component {
 		return '';
 	}
 
+	getFieldName = field => (field.type === 'radio' ? `${field.name}-${field.value}` : field.name);
+
+	getFieldValue = field => (field.type === 'checkbox' ? field.checked : field.value);
+
 	reset = () => {
 		const fields = this.getFields();
 
 		this.setState(Form.getInitialState({
 			fields,
 			values: Object.values(fields).reduce((values, field) =>
-				update(values, { [field.props.name]: { $set: this.getFieldInitialValue(field.props) } }),
+				update(values, { [field.props.name]: { $set: this.getFieldInitialValue(field.props, values) } }),
 				{},
 			),
 			isMounted: true,

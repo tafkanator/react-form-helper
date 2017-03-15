@@ -34,7 +34,7 @@ module.exports = {
 		new webpack.NamedModulesPlugin(),
 	],
 
-	devtool: 'cheap-eval-source-map',
+	devtool: 'cheap-module-source-map',
 
 	devServer: {
 		contentBase: [path.resolve(__dirname, 'examples')],

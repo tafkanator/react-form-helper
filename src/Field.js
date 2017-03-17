@@ -7,6 +7,7 @@ export default class Field extends Component {
 		isTouched: PropTypes.bool,
 		error: PropTypes.string,
 		validate: PropTypes.oneOfType([PropTypes.func, PropTypes.arrayOf(PropTypes.func)]),
+		transform: PropTypes.func,
 		name: PropTypes.string.isRequired,
 		type: PropTypes.string,
 		defaultValue: PropTypes.any,
@@ -40,6 +41,7 @@ export default class Field extends Component {
 			input,
 			component,
 			validate,  // eslint-disable-line no-unused-vars
+			transform,  // eslint-disable-line no-unused-vars
 			name, // eslint-disable-line no-unused-vars
 			type, // eslint-disable-line no-unused-vars
 			defaultValue, // eslint-disable-line no-unused-vars

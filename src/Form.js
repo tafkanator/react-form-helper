@@ -349,7 +349,16 @@ export default class Form extends Component {
 
 	getFieldName = field => (field.type === 'radio' ? `${field.name}-${field.value}` : field.name);
 
-	getFieldValue = field => (field.type === 'checkbox' ? field.checked : field.value);
+	getFieldValue = (field) => {
+		const {
+			fields,
+		} = this.state;
+
+		const rawValue = field.type === 'checkbox' ? field.checked : field.value;
+		const transformer = fields[field.name].props.transform;
+
+		return typeof transformer === 'function' ? transformer(rawValue) : rawValue;
+	}
 
 	reset = () => {
 		const fields = this.getFields();

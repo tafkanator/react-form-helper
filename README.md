@@ -1,13 +1,13 @@
 # React form
 
-A library to help build forms in React faster:
+A very simple and lightweight library to help build forms in React faster:
 * manages form state by itself
 * helps with field validation (client and server side)
 * helps with async form submitting
 
 ```javascript
 import React from 'react';
-import { Form, Field } from 'react-form';
+import { Form, Field } from 'react-form-helper-sl';
 
 const Form = () => (
 	<Form onSubmit={(values) => { /* { firstName: '', lastName: '' } */ }}>

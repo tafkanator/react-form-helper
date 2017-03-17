@@ -135,7 +135,7 @@ var Field = function (_Component) {
 	}
 
 	Field.prototype.__shouldComponentUpdate__REACT_HOT_LOADER__ = function __shouldComponentUpdate__REACT_HOT_LOADER__(nextProps) {
-		return this.props.input.value !== nextProps.input.value || this.props.isTouched !== nextProps.isTouched || this.props.error !== nextProps.error;
+		return this.props.input.value !== nextProps.input.value || this.props.input.checked !== nextProps.input.checked || this.props.isTouched !== nextProps.isTouched || this.props.error !== nextProps.error;
 	};
 
 	Field.prototype.__render__REACT_HOT_LOADER__ = function __render__REACT_HOT_LOADER__() {
@@ -143,10 +143,14 @@ var Field = function (_Component) {
 		    input = _props.input,
 		    component = _props.component,
 		    validate = _props.validate,
+		    transform = _props.transform,
 		    name = _props.name,
 		    type = _props.type,
 		    defaultValue = _props.defaultValue,
-		    rest = _objectWithoutProperties(_props, ['input', 'component', 'validate', 'name', 'type', 'defaultValue']);
+		    defaultChecked = _props.defaultChecked,
+		    onBlur = _props.onBlur,
+		    onChange = _props.onChange,
+		    rest = _objectWithoutProperties(_props, ['input', 'component', 'validate', 'transform', 'name', 'type', 'defaultValue', 'defaultChecked', 'onBlur', 'onChange']);
 
 		if (typeof component === 'function') {
 			return component(input, rest);
@@ -183,15 +187,26 @@ Field.propTypes = {
 	isTouched: _react.PropTypes.bool,
 	error: _react.PropTypes.string,
 	validate: _react.PropTypes.oneOfType([_react.PropTypes.func, _react.PropTypes.arrayOf(_react.PropTypes.func)]),
+	transform: _react.PropTypes.func,
 	name: _react.PropTypes.string.isRequired,
 	type: _react.PropTypes.string,
 	defaultValue: _react.PropTypes.any,
+	value: _react.PropTypes.any,
+	onBlur: _react.PropTypes.func,
+	onChange: _react.PropTypes.func,
+	defaultChecked: _react.PropTypes.bool,
 	input: _react.PropTypes.shape({
 		onChange: _react.PropTypes.func,
 		onBlur: _react.PropTypes.func,
 		type: _react.PropTypes.any,
-		value: _react.PropTypes.any
+		name: _react.PropTypes.string.isRequired,
+		value: _react.PropTypes.any,
+		checked: _react.PropTypes.bool
 	})
+};
+Field.defaultProps = {
+	type: 'text',
+	className: 'field'
 };
 var _default = Field;
 exports.default = _default;
@@ -374,14 +389,26 @@ var Form = function (_Component) {
 			var _this17;
 
 			return (_this17 = _this).__getFieldErrors__REACT_HOT_LOADER__.apply(_this17, arguments);
-		}, _this.getFieldInitialValue = function () {
+		}, _this.validateField = function () {
 			var _this18;
 
-			return (_this18 = _this).__getFieldInitialValue__REACT_HOT_LOADER__.apply(_this18, arguments);
-		}, _this.reset = function () {
+			return (_this18 = _this).__validateField__REACT_HOT_LOADER__.apply(_this18, arguments);
+		}, _this.getFieldInitialValue = function () {
 			var _this19;
 
-			return (_this19 = _this).__reset__REACT_HOT_LOADER__.apply(_this19, arguments);
+			return (_this19 = _this).__getFieldInitialValue__REACT_HOT_LOADER__.apply(_this19, arguments);
+		}, _this.getFieldName = function () {
+			var _this20;
+
+			return (_this20 = _this).__getFieldName__REACT_HOT_LOADER__.apply(_this20, arguments);
+		}, _this.getFieldValue = function () {
+			var _this21;
+
+			return (_this21 = _this).__getFieldValue__REACT_HOT_LOADER__.apply(_this21, arguments);
+		}, _this.reset = function () {
+			var _this22;
+
+			return (_this22 = _this).__reset__REACT_HOT_LOADER__.apply(_this22, arguments);
 		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
@@ -410,35 +437,59 @@ var Form = function (_Component) {
 		);
 	};
 
-	Form.prototype.__handleChange__REACT_HOT_LOADER__ = function __handleChange__REACT_HOT_LOADER__(validators, e) {
-		var _update, _update2;
+	Form.prototype.__handleChange__REACT_HOT_LOADER__ = function __handleChange__REACT_HOT_LOADER__(onChange, e) {
+		var _this23 = this;
 
-		var key = e.target.name;
-		var value = e.target.value;
+		var _state = this.state,
+		    values = _state.values,
+		    touchedFields = _state.touchedFields;
 
-		var error = this.isTouched(key) ? this.getFieldErrors(e.target.name, value) : null;
 
-		this.setState({
-			values: (0, _immutabilityHelper2.default)(this.state.values, (_update = {}, _update[key] = { $set: value }, _update)),
-			errors: (0, _immutabilityHelper2.default)(this.state.errors, (_update2 = {}, _update2[key] = { $set: error }, _update2))
+		var key = this.getFieldName(e.target);
+		var value = this.getFieldValue(e.target);
+
+		this.setState(function () {
+			var _update;
+
+			return {
+				values: (0, _immutabilityHelper2.default)(values, (_update = {}, _update[key] = { $set: value }, _update))
+			};
+		}, function () {
+			// wait for
+			if (_this23.isTouched(key)) {
+				_this23.validateField(key);
+			}
+
+			if (typeof onChange === 'function') {
+				onChange(e, function (fieldName) {
+					if (touchedFields.indexOf(fieldName) === -1) {
+						return;
+					}
+
+					_this23.validateField(fieldName);
+				});
+			}
 		});
 	};
 
-	Form.prototype.__handleBlur__REACT_HOT_LOADER__ = function __handleBlur__REACT_HOT_LOADER__(validators, e) {
-		var _update3;
+	Form.prototype.__handleBlur__REACT_HOT_LOADER__ = function __handleBlur__REACT_HOT_LOADER__(onBlur, e) {
+		var _update2;
 
-		var key = e.target.name;
-		var value = e.target.value;
+		var _state2 = this.state,
+		    errors = _state2.errors,
+		    touchedFields = _state2.touchedFields;
 
-		var newState = {
-			errors: (0, _immutabilityHelper2.default)(this.state.errors, (_update3 = {}, _update3[key] = { $set: this.getFieldErrors(e.target.name, value) }, _update3))
-		};
 
-		if (this.state.touchedFields.indexOf(key) === -1) {
-			newState.touchedFields = (0, _immutabilityHelper2.default)(this.state.touchedFields, { $push: [key] });
+		var key = this.getFieldName(e.target);
+
+		this.setState({
+			errors: (0, _immutabilityHelper2.default)(errors, (_update2 = {}, _update2[key] = { $set: this.getFieldErrors(key) }, _update2)),
+			touchedFields: this.isTouched(key) ? touchedFields : (0, _immutabilityHelper2.default)(touchedFields, { $push: [key] })
+		});
+
+		if (typeof onBlur === 'function') {
+			onBlur(e, this.validateField);
 		}
-
-		this.setState(newState);
 	};
 
 	Form.prototype.__handleSubmit__REACT_HOT_LOADER__ = function __handleSubmit__REACT_HOT_LOADER__(e) {
@@ -471,9 +522,10 @@ var Form = function (_Component) {
 
 	Form.prototype.__handleSuccess__REACT_HOT_LOADER__ = function __handleSuccess__REACT_HOT_LOADER__() {
 		var onSuccess = this.props.onSuccess;
+		var isMounted = this.state.isMounted;
 
 
-		if (this.state.isMounted && onSuccess !== undefined) {
+		if (isMounted && onSuccess !== undefined) {
 			this.setState({
 				isSubmitting: false
 			});
@@ -484,9 +536,10 @@ var Form = function (_Component) {
 
 	Form.prototype.__handleFail__REACT_HOT_LOADER__ = function __handleFail__REACT_HOT_LOADER__(e) {
 		var onFail = this.props.onFail;
+		var isMounted = this.state.isMounted;
 
 
-		if (this.state.isMounted && onFail !== undefined) {
+		if (isMounted && onFail !== undefined) {
 			var newState = {
 				isSubmitting: false
 			};
@@ -515,43 +568,58 @@ var Form = function (_Component) {
 	};
 
 	Form.prototype.__getEnhancedChildren__REACT_HOT_LOADER__ = function __getEnhancedChildren__REACT_HOT_LOADER__(children) {
-		var _this20 = this;
+		var _this24 = this;
 
 		return _react2.default.Children.map(children, function (child) {
-			switch (_this20.getInstanceOf(child)) {
-				case _Field2.default.name:
+			var _state3 = _this24.state,
+			    values = _state3.values,
+			    errors = _state3.errors,
+			    isSubmitting = _state3.isSubmitting;
 
-					// enhance element
-					return _react2.default.cloneElement(child, {
-						isTouched: _this20.isTouched(child.props.name),
-						error: _this20.state.errors[child.props.name] || null,
-						input: {
-							onChange: _this20.handleChange.bind(null, child.props.validate),
-							onBlur: _this20.handleBlur.bind(null, child.props.validate),
+
+			switch (_this24.getInstanceOf(child)) {
+				case _Field2.default.name:
+					{
+						var input = {
+							onChange: _this24.handleChange.bind(null, child.props.onChange),
+							onBlur: _this24.handleBlur.bind(null, child.props.onBlur),
 							name: child.props.name,
-							type: child.props.type,
-							value: _this20.state.values[child.props.name]
+							type: child.props.type
+						};
+
+						if (child.props.type === 'radio') {
+							input.value = child.props.value;
+							input.checked = values[child.props.name] === child.props.value;
+						} else {
+							input.value = values[child.props.name];
 						}
-					});
+
+						// enhance element
+						return _react2.default.cloneElement(child, {
+							isTouched: _this24.isTouched(child.props.name),
+							error: errors[child.props.name] || null,
+							input: input
+						});
+					}
 
 				case _WithFormProp2.default.name:
 					return _react2.default.cloneElement(child, {
 						values: {
-							hasErrors: Object.values(_this20.state.errors).filter(function (value) {
+							hasErrors: Object.values(errors).filter(function (value) {
 								return Boolean(value);
 							}).length > 0,
-							isSubmitting: _this20.state.isSubmitting
+							isSubmitting: isSubmitting
 						}
 					});
 
 				default:
-					return child.props && child.props.children ? _react2.default.cloneElement(child, { children: _this20.getEnhancedChildren(child.props.children) }) : child;
+					return child.props && child.props.children ? _react2.default.cloneElement(child, { children: _this24.getEnhancedChildren(child.props.children) }) : child;
 			}
 		});
 	};
 
 	Form.prototype.__getFields__REACT_HOT_LOADER__ = function __getFields__REACT_HOT_LOADER__() {
-		var _this21 = this;
+		var _this25 = this;
 
 		var children = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.props.children;
 		var formFields = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -565,11 +633,16 @@ var Form = function (_Component) {
 
 			if (child.props.children) {
 				// if nested, go deeper
-				fields = (0, _immutabilityHelper2.default)(fields, { $merge: _this21.getFields(child.props.children, fields) });
-			} else if (_this21.getInstanceOf(child) === _Field2.default.name) {
+				fields = (0, _immutabilityHelper2.default)(fields, { $merge: _this25.getFields(child.props.children, fields) });
+			} else if (_this25.getInstanceOf(child) === _Field2.default.name) {
 				// if it is field, create reference for it
-				_this21.validateFieldProps(child, fields);
-				fields[child.props.name] = child;
+				_this25.validateFieldProps(child, fields);
+
+				if (child.props.type === 'radio') {
+					fields[child.props.name + '-' + child.props.value] = child;
+				} else {
+					fields[child.props.name] = child;
+				}
 			}
 		});
 
@@ -577,7 +650,16 @@ var Form = function (_Component) {
 	};
 
 	Form.prototype.__validateFieldProps__REACT_HOT_LOADER__ = function __validateFieldProps__REACT_HOT_LOADER__(child, fields) {
-		if (false) {
+		if (true) {
+			return;
+		}
+
+		if (child.props.type === 'radio' && child.props.value === undefined) {
+			// eslint-disable-next-line no-console
+			console.error('Warning: Field with name "' + child.props.name + '" does not have prop "value".');
+		}
+
+		if (child.props.name in fields && child.props.type !== 'radio') {
 			// eslint-disable-next-line no-console
 			console.error('Warning: Field with name "' + child.props.name + '" already exists. Use different value for name');
 		}
@@ -588,16 +670,15 @@ var Form = function (_Component) {
 	};
 
 	Form.prototype.__checkFormErrors__REACT_HOT_LOADER__ = function __checkFormErrors__REACT_HOT_LOADER__() {
-		var _this22 = this;
+		var _this26 = this;
 
-		var _state = this.state,
-		    touchedFields = _state.touchedFields,
-		    fields = _state.fields,
-		    values = _state.values;
+		var _state4 = this.state,
+		    touchedFields = _state4.touchedFields,
+		    fields = _state4.fields;
 
 
 		var errors = Object.keys(fields).reduce(function (obj, name) {
-			var error = _this22.getFieldErrors(name, values[name]);
+			var error = _this26.getFieldErrors(name);
 
 			if (error) {
 				obj[name] = error; // eslint-disable-line no-param-reassign
@@ -614,14 +695,19 @@ var Form = function (_Component) {
 		return Object.keys(errors).length > 0;
 	};
 
-	Form.prototype.__getFieldErrors__REACT_HOT_LOADER__ = function __getFieldErrors__REACT_HOT_LOADER__(fieldName, value) {
-		var validators = this.state.fields[fieldName].props.validate;
+	Form.prototype.__getFieldErrors__REACT_HOT_LOADER__ = function __getFieldErrors__REACT_HOT_LOADER__(fieldName) {
+		var _state5 = this.state,
+		    values = _state5.values,
+		    fields = _state5.fields;
+
+
+		var validators = fields[fieldName].props.validate;
 
 		if (typeof validators === 'function') {
-			return validators(value) || null;
+			return validators(fieldName, values) || null;
 		} else if (Array.isArray(validators)) {
 			return validators.map(function (validator) {
-				return validator(value);
+				return validator(fieldName, values);
 			}).filter(function (val) {
 				return Boolean(val);
 			}).join(', ');
@@ -630,7 +716,32 @@ var Form = function (_Component) {
 		return null;
 	};
 
-	Form.prototype.__getFieldInitialValue__REACT_HOT_LOADER__ = function __getFieldInitialValue__REACT_HOT_LOADER__(props) {
+	Form.prototype.__validateField__REACT_HOT_LOADER__ = function __validateField__REACT_HOT_LOADER__(name) {
+		var _update3;
+
+		var errors = this.state.errors;
+
+
+		var error = this.getFieldErrors(name);
+
+		this.setState({
+			errors: (0, _immutabilityHelper2.default)(errors, (_update3 = {}, _update3[name] = { $set: error }, _update3))
+		});
+	};
+
+	Form.prototype.__getFieldInitialValue__REACT_HOT_LOADER__ = function __getFieldInitialValue__REACT_HOT_LOADER__(props, values) {
+		if (props.type === 'checkbox') {
+			return !!props.defaultChecked;
+		}
+
+		if (props.type === 'radio') {
+			if (props.defaultChecked) {
+				return props.value;
+			}
+
+			return props.name in values ? values[props.name] : undefined;
+		}
+
 		if (props.defaultValue !== undefined) {
 			return props.defaultValue;
 		}
@@ -638,8 +749,22 @@ var Form = function (_Component) {
 		return '';
 	};
 
+	Form.prototype.__getFieldName__REACT_HOT_LOADER__ = function __getFieldName__REACT_HOT_LOADER__(field) {
+		return field.type === 'radio' ? field.name + '-' + field.value : field.name;
+	};
+
+	Form.prototype.__getFieldValue__REACT_HOT_LOADER__ = function __getFieldValue__REACT_HOT_LOADER__(field) {
+		var fields = this.state.fields;
+
+
+		var rawValue = field.type === 'checkbox' ? field.checked : field.value;
+		var transformer = fields[field.name].props.transform;
+
+		return typeof transformer === 'function' ? transformer(rawValue) : rawValue;
+	};
+
 	Form.prototype.__reset__REACT_HOT_LOADER__ = function __reset__REACT_HOT_LOADER__() {
-		var _this23 = this;
+		var _this27 = this;
 
 		var fields = this.getFields();
 
@@ -648,7 +773,7 @@ var Form = function (_Component) {
 			values: Object.values(fields).reduce(function (values, field) {
 				var _update4;
 
-				return (0, _immutabilityHelper2.default)(values, (_update4 = {}, _update4[field.props.name] = { $set: _this23.getFieldInitialValue(field.props) }, _update4));
+				return (0, _immutabilityHelper2.default)(values, (_update4 = {}, _update4[field.props.name] = { $set: _this27.getFieldInitialValue(field.props, values) }, _update4));
 			}, {}),
 			isMounted: true
 		}));

@@ -1,6 +1,6 @@
 # React form
 
-This library helps to build forms in react faster:
+A library to help build forms in React faster:
 * manages form state by itself
 * helps with field validation (client and server side)
 * helps with async form submitting
@@ -21,7 +21,8 @@ const Form = () => (
 export default Form;
 ```
 
-Table of contents:
+## Table of contents
+
 * [Components](#components)
 * [How validation works](#how-validation-works)
 * [Examples](#examples)
@@ -32,21 +33,48 @@ Table of contents:
 ### `<Form />`
 This is for wrapping all form. It stores all form state. It also gives callbacks for `onSubmit`, `onSuccess` and `onError`
 
+#### possible values
+```javascript
+<Form
+	className="form"
+	onSubmit={(values) => { /* return promise, object with errors, true, false or nothing here */ }}
+	onSuccess={(reset) => { reset(); /* reset form values */ } }
+	onFail={(e) => { return e.validationErrors; /* return object where key is field name and value is error message */ } }
+>
+	children
+</Form>
+```
+
 ### `<Field />`
 A single input. It can be any input or even custom component.
 
-| Prop | description | default value |
-|------|-------------|---------------|
-| name | used as a key for storing value | required field
+| Prop | description | default |
+|------|-------------|---------|
+| name | used as a key for storing value. This field is required and have to be unique |
 | type | any input type eg: `number`, `range`, `email`, `textarea`, `checkbox`, `radio` ... | text
 | defaultValue | initial field value | ""
-| defaultChecked | initial field value for checkbox | `false`
-| className | css class form rendering. If default renderer is used, it will generate following classNames: `field`, `field--has-errors`, `field__input`, `field__error` | field |
-| validate | callback for validating input value. Can be function or array of functions. Function must return error message string or `undefined` |
+| defaultChecked | initial field value for checkbox | false
+| className | css class. If default renderer is used, it will generate following classNames: `field`, `field--has-errors`, `field__input`, `field__error`. If className is provided, `field` will be replaced | field |
+| validate | callback for validating input value. Can be function or array of functions. Function must return error string or `undefined` |
 | component | This is used for rendering custom JSX instead default one. It gives two sets of parameters: input - required for making state updating to work,  props - error, isTouched, className and any other custom parameter defined in `<Field />` |
 | onChange | callback whenever input value changes. it gives tow parameters: `event` and `validate(fieldName)`. validate can be used to trigger validation for another field |
 | onBlur | callback whenever input is blurred. It gives one parameter: `event` |
 
+#### possible values
+```javascript
+<Field
+	name="requiredString"
+	type="number"
+	className="my-input"
+	defaultValue={7}
+	component={(input, props) => {}}
+	validate={(name, values) => values[name] < 1 && 'Has to be positive integer'}
+	transform={value => parseInt(value, 10)}
+	{...customProps}
+/>
+```
+
+#### example
 ```javascript
 // If using custom component, it is possible to inject any property to component
 
@@ -66,20 +94,6 @@ const Form = () => (
 		<button type="submit">Submit</submit>
 	</Form>
 );
-```
-
-```javascript
-// possible values
-<Field
-	name="requiredString"
-	type="number"
-	className="my-input"
-	defaultValue={7}
-	component={(input, props) => {}}
-	validate={(name, values) => values[name] < 1 && 'Has to be positive integer'}
-	transform={value => parseInt(value, 10)}
-	{...customProps}
-/>
 ```
 
 
@@ -120,28 +134,36 @@ There are two ways to use it:
 
 ## How validation works
 
-* if field has been touched (), every time value is changed, it will validate itself.
+* if field has been touched (input has been blurred at least once or user has tried to submit form), every time value is changed, it will validate itself.
 * whenever form is submitted, all validations are run, and if no errors are found, `onSubmit` will be called
 * if `onSubmit` returns false, `onError` is called. If promise is returned, it will resolve it, otherwise `onSuccess` is called
 
 
 ## Examples
+[Full example can be found here](examples/App.js)
 
-### Form validation
+### Custom Field renderer
 
-First name has to be defined. Last name have to be at least 5 characters long
 ```javascript
 // ...
 
-export const required = (name, values) => (values[name] ? undefined : 'Field is required');
+const renderSelect = (input, { error, isTouched, className }) => (
+	<div className={className}>
+		<select {...input} className={`${className}__input`}>
+			<option value="18-">&lt; 18</option>
+			<option value="18-50">18-50</option>
+			<option value="50+">&gt; 50</option>
+		</select>
 
-const minLength = min => (name, values) =>
-	(values[name] && values[name].length < min ? `Must be at least ${min} characters` : undefined);
+		{isTouched && error && (
+			<span className={`${className}__error`}>{error}</span>
+		)}
+	</div>
+);
 
 const Form = () => (
 	<Form onSubmit={(values) => { /* do something with values */ }}>
-		<Field name="firstName" validate={required} />
-		<Field name="lastName"  validate={[required, minLength(5)]} />
+		<Field name="age" component={renderSelect} defaultValue="18-" />
 
 		<button type="submit">Submit</submit>
 	</Form>
@@ -150,6 +172,33 @@ const Form = () => (
 // ...
 ```
 
+### Form validation
+
+First name has to be defined. Last name have to be at least 5 characters long. IF checkbox is checked, email must be defined.
+```javascript
+// ...
+
+export const required = (name, values) => (values[name] ? undefined : 'Field is required');
+
+const minLength = min => (name, values) =>
+	(values[name] && values[name].length < min ? `Must be at least ${min} characters` : undefined);
+
+const requiredIfHasField = fieldName => (name, values) =>
+	(values[fieldName] && !values[name] ? 'Field is required' : undefined);
+
+const Form = () => (
+	<Form onSubmit={(values) => { /* do something with values */ }}>
+		<Field name="firstName" validate={required} />
+		<Field name="lastName"  validate={[required, minLength(5)]} />
+		<Field type="email" name="email" validate={requiredIfHasField('subscribeToEmail')} />
+		<Field type="checkbox" name="subscribeToEmail" onChange={(e, validate) => { validate('email'); }} />
+
+		<button type="submit">Submit</submit>
+	</Form>
+);
+
+// ...
+```
 
 ## RUNNING EXAMPLES
 * download project:

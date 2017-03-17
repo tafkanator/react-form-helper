@@ -56,11 +56,7 @@ const App = () => (
 
 		<div className="form__row">
 			<label className="form__row__label">
-				<Field
-					type="checkbox"
-					name="subscribeToEmail"
-					onChange={(e, validate) => { validate('email'); }}
-				/>
+				<Field type="checkbox" name="subscribeToEmail" onChange={(e, validate) => { validate('email'); }} />
 				Get email notifications
 			</label>
 		</div>

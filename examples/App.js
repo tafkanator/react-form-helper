@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Form, Field, WithFormProp } from '../src';
-import { required, minLength } from './validators';
+import { required, minLength, requiredIfHasField } from './validators';
 
 const handleCommentFormSubmit = (values) => {
 	console.log('submit', values);
@@ -27,8 +27,8 @@ const renderSelect = (input, { error, isTouched, className }) => (
 
 const renderRange = (input, { error, isTouched, className }) => (
 	<div className={className}>
+		<label className="form__row__label">Programming skill level: {input.value}</label>
 		<input {...input} min="1" max="10" className={`${className}__input`} />
-		{input.value}
 
 		{isTouched && error && (
 			<span className={`${className}__error`}>{error}</span>
@@ -51,7 +51,18 @@ const App = () => (
 
 		<div className="form__row">
 			<label className="form__row__label">Email</label>
-			<Field type="email" name="email" validate={[required, minLength(3)]} />
+			<Field type="email" name="email" validate={requiredIfHasField('subscribeToEmail')} />
+		</div>
+
+		<div className="form__row">
+			<label className="form__row__label">
+				<Field
+					type="checkbox"
+					name="subscribeToEmail"
+					onChange={(e, validate) => { validate('email'); }}
+				/>
+				Get email notifications
+			</label>
 		</div>
 
 		<div className="form__row">
@@ -77,21 +88,14 @@ const App = () => (
 		</div>
 
 		<div className="form__row">
-			<label className="form__row__label">Programming skill level</label>
 			<Field
 				name="programmingSkill"
 				type="range"
+				label="Programming skill level"
 				defaultValue={5}
 				component={renderRange}
 				transform={value => parseInt(value, 10)}
 			/>
-		</div>
-
-		<div className="form__row">
-			<label className="form__row__label">
-				<Field type="checkbox" name="subscribeToEmail" />
-				Get email notifications
-			</label>
 		</div>
 
 		<div className="form__actions">

@@ -51,37 +51,51 @@ export default class Form extends Component {
 		);
 	};
 
-	handleChange = (validators, e) => {
+	handleChange = (onChange, e) => {
 		const {
 			values,
-			errors,
+			touchedFields,
 		} = this.state;
 
-		const key = e.target.name;
+		const key = this.getFieldName(e.target);
 		const value = this.getFieldValue(e.target);
-		const error = this.isTouched(key) ? this.getFieldErrors(this.getFieldName(e.target), value) : null;
 
-		this.setState({
+		this.setState(() => ({
 			values: update(values, { [key]: { $set: value } }),
-			errors: update(errors, { [key]: { $set: error } }),
+		}), () => {
+			// wait for
+			if (this.isTouched(key)) {
+				this.validateField(key);
+			}
+
+			if (typeof onChange === 'function') {
+				onChange(e, (fieldName) => {
+					if (touchedFields.indexOf(fieldName) === -1) {
+						return;
+					}
+
+					this.validateField(fieldName);
+				});
+			}
 		});
 	}
 
-	handleBlur = (validators, e) => {
+	handleBlur = (onBlur, e) => {
 		const {
 			errors,
 			touchedFields,
 		} = this.state;
 
-		const key = e.target.name;
-		const value = this.getFieldValue(e.target);
+		const key = this.getFieldName(e.target);
 
 		this.setState({
-			errors: update(errors, { [key]: { $set: this.getFieldErrors(this.getFieldName(e.target), value) } }),
-			touchedFields: touchedFields.indexOf(key) === -1
-				? update(touchedFields, { $push: [key] })
-				: touchedFields,
+			errors: update(errors, { [key]: { $set: this.getFieldErrors(key) } }),
+			touchedFields: this.isTouched(key) ? touchedFields : update(touchedFields, { $push: [key] }),
 		});
+
+		if (typeof onBlur === 'function') {
+			onBlur(e, this.validateField);
+		}
 	}
 
 	handleSubmit = (e) => {
@@ -118,7 +132,11 @@ export default class Form extends Component {
 			onSuccess,
 		} = this.props;
 
-		if (this.state.isMounted && onSuccess !== undefined) {
+		const {
+			isMounted,
+		} = this.state;
+
+		if (isMounted && onSuccess !== undefined) {
 			this.setState({
 				isSubmitting: false,
 			});
@@ -132,7 +150,11 @@ export default class Form extends Component {
 			onFail,
 		} = this.props;
 
-		if (this.state.isMounted && onFail !== undefined) {
+		const {
+			isMounted,
+		} = this.state;
+
+		if (isMounted && onFail !== undefined) {
 			const newState = {
 				isSubmitting: false,
 			};
@@ -159,26 +181,32 @@ export default class Form extends Component {
 	}
 
 	getEnhancedChildren = children => React.Children.map(children, (child) => {
+		const {
+			values,
+			errors,
+			isSubmitting,
+		} = this.state;
+
 		switch (this.getInstanceOf(child)) {
 			case Field.name: {
 				const input = {
-					onChange: this.handleChange.bind(null, child.props.validate),
-					onBlur: this.handleBlur.bind(null, child.props.validate),
+					onChange: this.handleChange.bind(null, child.props.onChange),
+					onBlur: this.handleBlur.bind(null, child.props.onBlur),
 					name: child.props.name,
 					type: child.props.type,
 				};
 
 				if (child.props.type === 'radio') {
 					input.value = child.props.value;
-					input.checked = this.state.values[child.props.name] === child.props.value;
+					input.checked = values[child.props.name] === child.props.value;
 				} else {
-					input.value = this.state.values[child.props.name];
+					input.value = values[child.props.name];
 				}
 
 				// enhance element
 				return React.cloneElement(child, {
 					isTouched: this.isTouched(child.props.name),
-					error: this.state.errors[child.props.name] || null,
+					error: errors[child.props.name] || null,
 					input,
 				});
 			}
@@ -186,8 +214,8 @@ export default class Form extends Component {
 			case WithFormProp.name:
 				return React.cloneElement(child, {
 					values: {
-						hasErrors: Object.values(this.state.errors).filter(value => Boolean(value)).length > 0,
-						isSubmitting: this.state.isSubmitting,
+						hasErrors: Object.values(errors).filter(value => Boolean(value)).length > 0,
+						isSubmitting,
 					},
 				});
 
@@ -250,11 +278,10 @@ export default class Form extends Component {
 		const {
 			touchedFields,
 			fields,
-			values,
 		} = this.state;
 
 		const errors = Object.keys(fields).reduce((obj, name) => {
-			const error = this.getFieldErrors(name, values[name]);
+			const error = this.getFieldErrors(name);
 
 			if (error) {
 				obj[name] = error; // eslint-disable-line no-param-reassign
@@ -271,16 +298,33 @@ export default class Form extends Component {
 		return Object.keys(errors).length > 0;
 	}
 
-	getFieldErrors = (fieldName, value) => {
-		const validators = this.state.fields[fieldName].props.validate;
+	getFieldErrors = (fieldName) => {
+		const {
+			values,
+			fields,
+		} = this.state;
+
+		const validators = fields[fieldName].props.validate;
 
 		if (typeof validators === 'function') {
-			return validators(value) || null;
+			return validators(fieldName, values) || null;
 		} else if (Array.isArray(validators)) {
-			return validators.map(validator => validator(value)).filter(val => Boolean(val)).join(', ');
+			return validators.map(validator => validator(fieldName, values)).filter(val => Boolean(val)).join(', ');
 		}
 
 		return null;
+	}
+
+	validateField = (name) => {
+		const {
+			errors,
+		} = this.state;
+
+		const error = this.getFieldErrors(name);
+
+		this.setState({
+			errors: update(errors, { [name]: { $set: error } }),
+		});
 	}
 
 	getFieldInitialValue = (props, values) => {

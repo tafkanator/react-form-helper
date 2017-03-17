@@ -11,6 +11,8 @@ export default class Field extends Component {
 		type: PropTypes.string,
 		defaultValue: PropTypes.any,
 		value: PropTypes.any,
+		onBlur: PropTypes.func,
+		onChange: PropTypes.func,
 		defaultChecked: PropTypes.bool,
 		input: PropTypes.shape({
 			onChange: PropTypes.func,
@@ -42,6 +44,8 @@ export default class Field extends Component {
 			type, // eslint-disable-line no-unused-vars
 			defaultValue, // eslint-disable-line no-unused-vars
 			defaultChecked, // eslint-disable-line no-unused-vars
+			onBlur, // eslint-disable-line no-unused-vars
+			onChange, // eslint-disable-line no-unused-vars
 			...rest
 		} = this.props;
 

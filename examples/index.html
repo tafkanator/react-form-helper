@@ -42,24 +42,31 @@
 			margin-top: 2rem;
 		}
 
-		.form__row + .form__row {
+		.field {
+			display: block;
+		}
+
+		.field .field {
+			display: inline-block;
+		}
+
+		.field + .field {
 			margin-top: 2rem;
 		}
 
-		.form__row__label {
+		.field__label {
 			display: block;
 			color: #666;
 		}
 
-		.form__row__option + .form__row__option {
+		.field__option {
 			display: inline-block;
+		}
+
+		.field__option + .field__option {
 			margin-left: 1rem;
 		}
 
-		.field + .field {
-			display: inline-block;
-			margin-left: 10rem;
-		}
 
 		.field__input {
 			display: block;

@@ -51,9 +51,11 @@ A single input. It can be any input or even custom component.
 | Prop | description | default |
 |------|-------------|---------|
 | name | used as a key for storing value. This field is required and have to be unique |
-| type | any input type eg: `number`, `range`, `email`, `textarea`, `checkbox`, `radio` ... | text
+| type | any input type eg: `number`, `range`, `email`, `textarea`, `checkbox`, `radio`, `select` ... | text
 | defaultValue | initial field value | ""
 | defaultChecked | initial field value for checkbox | false
+| label | if provided, will render html `<label>`
+| options | if type is `select`, then you need to provide options as an array of objects, where object key is value and and object value is label. eg `[{ value1: 'Value 1' }]`
 | className | css class. If default renderer is used, it will generate following classNames: `field`, `field--has-errors`, `field__input`, `field__error`. If className is provided, `field` will be replaced | field |
 | validate | callback for validating input value. Can be function or array of functions. Function must return error string or `undefined` |
 | component | This is used for rendering custom JSX instead default one. It gives two sets of parameters: input - required for making state updating to work,  props - error, isTouched, className and any other custom parameter defined in `<Field />` |
@@ -67,6 +69,7 @@ A single input. It can be any input or even custom component.
 	type="number"
 	className="my-input"
 	defaultValue={7}
+	options={[{ option1: 'Option 1' }, { option1: 'Option 1' }]} // only used if type="select"
 	component={(input, props) => {}}
 	validate={(name, values) => values[name] < 1 && 'Has to be positive integer'}
 	transform={value => parseInt(value, 10)}

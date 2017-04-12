@@ -1,4 +1,4 @@
-
+/* eslint-disable no-console */
 import React from 'react';
 import { Form, Field, WithFormProp } from '../src';
 import { required, minLength, requiredIfHasField } from './validators';
@@ -11,19 +11,11 @@ const handleCommentFormSubmit = (values) => {
 const handleCommentFormSuccess = reset => reset();
 const handleCommentFormFail = e => console.log('fail', e);
 
-const renderSelect = (input, { error, isTouched, className }) => (
-	<div className={className}>
-		<select {...input} className={`${className}__input`}>
-			<option value="18-">&lt; 18</option>
-			<option value="18-50">18-50</option>
-			<option value="50+">&gt; 50</option>
-		</select>
-
-		{isTouched && error && (
-			<span className={`${className}__error`}>{error}</span>
-		)}
-	</div>
-);
+const ageOptions = [
+	{ '18-': '18' },
+	{ '18-50': '18-50' },
+	{ '50+': '> 50' },
+];
 
 const renderRange = (input, { error, isTouched, className }) => (
 	<div className={className}>
@@ -44,55 +36,42 @@ const App = () => (
 		onFail={handleCommentFormFail}
 	>
 		<h1 className="form__header">Register</h1>
-		<div className="form__row">
-			<label className="form__row__label">Name</label>
-			<Field name="name" validate={[required, minLength(3)]} />
-		</div>
 
-		<div className="form__row">
-			<label className="form__row__label">Email</label>
-			<Field type="email" name="email" validate={requiredIfHasField('subscribeToEmail')} />
-		</div>
+		<Field name="name" label="Name" validate={[required, minLength(3)]} />
 
-		<div className="form__row">
-			<label className="form__row__label">
+		<Field type="email" name="email" label="Email" validate={requiredIfHasField('subscribeToEmail')} />
+
+		<div className="field">
+			<label className="field__label">
 				<Field type="checkbox" name="subscribeToEmail" onChange={(e, validate) => { validate('email'); }} />
 				Get email notifications
 			</label>
 		</div>
 
-		<div className="form__row">
-			<label className="form__row__label">Comment</label>
-			<Field type="textarea" name="comment" validate={required} />
-		</div>
+		<Field type="textarea" name="comment" label="Comment" validate={required} />
 
-		<div className="form__row">
-			<span className="form__row__label">Gender</span>
-			<label className="form__row__option">
+		<div className="field">
+			<span className="field__label">Gender</span>
+			<label className="field__option">
 				<Field name="gender" type="radio" value="male" defaultChecked />
 				Male
 			</label>
-			<label className="form__row__option">
+			<label className="field__option">
 				<Field name="gender" type="radio" value="female" />
 				Female
 			</label>
 		</div>
 
-		<div className="form__row">
-			<label className="form__row__label">Age</label>
-			<Field name="age" component={renderSelect} defaultValue="18-" />
-		</div>
+		<Field name="age" label="Age" type="select" options={ageOptions} defaultValue={ageOptions[0]} />
 
-		<div className="form__row">
-			<Field
-				name="programmingSkill"
-				type="range"
-				label="Programming skill level"
-				defaultValue={5}
-				component={renderRange}
-				transform={value => parseInt(value, 10)}
-			/>
-		</div>
+		<Field
+			name="programmingSkill"
+			type="range"
+			label="Programming skill level"
+			defaultValue={5}
+			component={renderRange}
+			transform={value => parseInt(value, 10)}
+		/>
 
 		<div className="form__actions">
 			<WithFormProp isSubmitting>

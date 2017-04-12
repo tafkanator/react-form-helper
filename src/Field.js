@@ -10,6 +10,8 @@ export default class Field extends Component {
 		transform: PropTypes.func,
 		name: PropTypes.string.isRequired,
 		type: PropTypes.string,
+		label: PropTypes.string,
+		options: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.string)),
 		defaultValue: PropTypes.any,
 		value: PropTypes.any,
 		onBlur: PropTypes.func,
@@ -55,19 +57,46 @@ export default class Field extends Component {
 			return component(input, rest);
 		}
 
-		return this.renderInput(input, rest);
+		return this.renderField(input, rest);
 	}
 
-	renderInput = ({ type, ...props }, { isTouched, error, className }) => (
+	renderField = (input, { isTouched, error, className, label, options }) => (
 		<span className={isTouched && error ? `${className} ${className}--has-errors` : className}>
-			{type === 'textarea'
-				? (<textarea className={`${className}__input`} {...props} />)
-				: (<input className={`${className}__input`} type={type || 'text'} {...props} />)
-			}
+			{label && (
+				<label className={`${className}__label`}>{label}</label>
+			)}
+
+			{this.renderInput(input, options, className)}
 
 			{isTouched && error && (
 				<span className={`${className}__error`}>{error}</span>
 			)}
 		</span>
 	);
+
+	renderInput = ({ type, ...props }, options, className) => {
+		const inputClassName = `${className}__input ${className}__input--${(type || 'text')}`;
+
+		switch (type) {
+			case 'textarea': return (
+				<textarea className={inputClassName} {...props} />
+			);
+
+			case 'select': return (
+				<select {...props} className={inputClassName}>
+					{options.map((option) => {
+						const entries = Object.entries(option);
+						const value = entries[0][0];
+						const label = entries[0][1];
+
+						return (<option key={value} value={value}>{label}</option>);
+					})}
+				</select>
+			);
+
+			default: return (
+				<input className={inputClassName} type={type || 'text'} {...props} />
+			);
+		}
+	}
 }

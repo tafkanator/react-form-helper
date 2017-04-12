@@ -62,7 +62,7 @@ const App = () => (
 			</label>
 		</div>
 
-		<Field name="age" label="Age" type="select" options={ageOptions} defaultValue={ageOptions[0]} />
+		<Field name="age" label="Age" type="select" options={ageOptions} />
 
 		<Field
 			name="programmingSkill"

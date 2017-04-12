@@ -344,6 +344,10 @@ export default class Form extends Component {
 			return props.defaultValue;
 		}
 
+		if (props.type === 'select' && props.options && props.options.length > 0) {
+			return Object.values(props.options[0])[0];
+		}
+
 		return '';
 	}
 

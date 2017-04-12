@@ -57,11 +57,12 @@ export default class Form extends Component {
 			touchedFields,
 		} = this.state;
 
+		const name = e.target.name;
 		const key = this.getFieldName(e.target);
-		const value = this.getFieldValue(e.target);
+		const value = this.getFieldValue(e.target, key);
 
 		this.setState(() => ({
-			values: update(values, { [key]: { $set: value } }),
+			values: update(values, { [name]: { $set: value } }),
 		}), () => {
 			// wait for
 			if (this.isTouched(key)) {
@@ -86,11 +87,12 @@ export default class Form extends Component {
 			touchedFields,
 		} = this.state;
 
+		const name = e.target.name;
 		const key = this.getFieldName(e.target);
 
 		this.setState({
-			errors: update(errors, { [key]: { $set: this.getFieldErrors(key) } }),
-			touchedFields: this.isTouched(key) ? touchedFields : update(touchedFields, { $push: [key] }),
+			errors: update(errors, { [name]: { $set: this.getFieldErrors(key) } }),
+			touchedFields: this.isTouched(name) ? touchedFields : update(touchedFields, { $push: [name] }),
 		});
 
 		if (typeof onBlur === 'function') {
@@ -353,13 +355,13 @@ export default class Form extends Component {
 
 	getFieldName = field => (field.type === 'radio' ? `${field.name}-${field.value}` : field.name);
 
-	getFieldValue = (field) => {
+	getFieldValue = (field, name) => {
 		const {
 			fields,
 		} = this.state;
 
 		const rawValue = field.type === 'checkbox' ? field.checked : field.value;
-		const transformer = fields[field.name].props.transform;
+		const transformer = fields[name].props.transform;
 
 		return typeof transformer === 'function' ? transformer(rawValue) : rawValue;
 	}

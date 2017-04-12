@@ -127,10 +127,14 @@ var Field = function (_Component) {
 			var _this3;
 
 			return (_this3 = _this).__render__REACT_HOT_LOADER__.apply(_this3, arguments);
-		}, _this.renderInput = function () {
+		}, _this.renderField = function () {
 			var _this4;
 
-			return (_this4 = _this).__renderInput__REACT_HOT_LOADER__.apply(_this4, arguments);
+			return (_this4 = _this).__renderField__REACT_HOT_LOADER__.apply(_this4, arguments);
+		}, _this.renderInput = function () {
+			var _this5;
+
+			return (_this5 = _this).__renderInput__REACT_HOT_LOADER__.apply(_this5, arguments);
 		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
@@ -156,27 +160,62 @@ var Field = function (_Component) {
 			return component(input, rest);
 		}
 
-		return this.renderInput(input, rest);
+		return this.renderField(input, rest);
 	};
 
-	Field.prototype.__renderInput__REACT_HOT_LOADER__ = function __renderInput__REACT_HOT_LOADER__(_ref, _ref2) {
-		var isTouched = _ref2.isTouched,
-		    error = _ref2.error,
-		    className = _ref2.className;
-
-		var type = _ref.type,
-		    props = _objectWithoutProperties(_ref, ['type']);
-
+	Field.prototype.__renderField__REACT_HOT_LOADER__ = function __renderField__REACT_HOT_LOADER__(input, _ref) {
+		var isTouched = _ref.isTouched,
+		    error = _ref.error,
+		    className = _ref.className,
+		    label = _ref.label,
+		    options = _ref.options;
 		return _react2.default.createElement(
 			'span',
 			{ className: isTouched && error ? className + ' ' + className + '--has-errors' : className },
-			type === 'textarea' ? _react2.default.createElement('textarea', _extends({ className: className + '__input' }, props)) : _react2.default.createElement('input', _extends({ className: className + '__input', type: type || 'text' }, props)),
+			label && _react2.default.createElement(
+				'label',
+				{ className: className + '__label' },
+				label
+			),
+			this.renderInput(input, options, className),
 			isTouched && error && _react2.default.createElement(
 				'span',
 				{ className: className + '__error' },
 				error
 			)
 		);
+	};
+
+	Field.prototype.__renderInput__REACT_HOT_LOADER__ = function __renderInput__REACT_HOT_LOADER__(_ref2, options, className) {
+		var type = _ref2.type,
+		    props = _objectWithoutProperties(_ref2, ['type']);
+
+		var inputClassName = className + '__input ' + className + '__input--' + (type || 'text');
+
+		switch (type) {
+			case 'textarea':
+				return _react2.default.createElement('textarea', _extends({ className: inputClassName }, props));
+
+			case 'select':
+				return _react2.default.createElement(
+					'select',
+					_extends({}, props, { className: inputClassName }),
+					options.map(function (option) {
+						var entries = Object.entries(option);
+						var value = entries[0][0];
+						var label = entries[0][1];
+
+						return _react2.default.createElement(
+							'option',
+							{ key: value, value: value },
+							label
+						);
+					})
+				);
+
+			default:
+				return _react2.default.createElement('input', _extends({ className: inputClassName, type: type || 'text' }, props));
+		}
 	};
 
 	return Field;
@@ -190,6 +229,8 @@ Field.propTypes = {
 	transform: _react.PropTypes.func,
 	name: _react.PropTypes.string.isRequired,
 	type: _react.PropTypes.string,
+	label: _react.PropTypes.string,
+	options: _react.PropTypes.arrayOf(_react.PropTypes.objectOf(_react.PropTypes.string)),
 	defaultValue: _react.PropTypes.any,
 	value: _react.PropTypes.any,
 	onBlur: _react.PropTypes.func,
@@ -445,14 +486,15 @@ var Form = function (_Component) {
 		    touchedFields = _state.touchedFields;
 
 
+		var name = e.target.name;
 		var key = this.getFieldName(e.target);
-		var value = this.getFieldValue(e.target);
+		var value = this.getFieldValue(e.target, key);
 
 		this.setState(function () {
 			var _update;
 
 			return {
-				values: (0, _immutabilityHelper2.default)(values, (_update = {}, _update[key] = { $set: value }, _update))
+				values: (0, _immutabilityHelper2.default)(values, (_update = {}, _update[name] = { $set: value }, _update))
 			};
 		}, function () {
 			// wait for
@@ -480,11 +522,12 @@ var Form = function (_Component) {
 		    touchedFields = _state2.touchedFields;
 
 
+		var name = e.target.name;
 		var key = this.getFieldName(e.target);
 
 		this.setState({
-			errors: (0, _immutabilityHelper2.default)(errors, (_update2 = {}, _update2[key] = { $set: this.getFieldErrors(key) }, _update2)),
-			touchedFields: this.isTouched(key) ? touchedFields : (0, _immutabilityHelper2.default)(touchedFields, { $push: [key] })
+			errors: (0, _immutabilityHelper2.default)(errors, (_update2 = {}, _update2[name] = { $set: this.getFieldErrors(key) }, _update2)),
+			touchedFields: this.isTouched(name) ? touchedFields : (0, _immutabilityHelper2.default)(touchedFields, { $push: [name] })
 		});
 
 		if (typeof onBlur === 'function') {
@@ -746,6 +789,10 @@ var Form = function (_Component) {
 			return props.defaultValue;
 		}
 
+		if (props.type === 'select' && props.options && props.options.length > 0) {
+			return Object.values(props.options[0])[0];
+		}
+
 		return '';
 	};
 
@@ -753,12 +800,12 @@ var Form = function (_Component) {
 		return field.type === 'radio' ? field.name + '-' + field.value : field.name;
 	};
 
-	Form.prototype.__getFieldValue__REACT_HOT_LOADER__ = function __getFieldValue__REACT_HOT_LOADER__(field) {
+	Form.prototype.__getFieldValue__REACT_HOT_LOADER__ = function __getFieldValue__REACT_HOT_LOADER__(field, name) {
 		var fields = this.state.fields;
 
 
 		var rawValue = field.type === 'checkbox' ? field.checked : field.value;
-		var transformer = fields[field.name].props.transform;
+		var transformer = fields[name].props.transform;
 
 		return typeof transformer === 'function' ? transformer(rawValue) : rawValue;
 	};
